@@ -16,9 +16,11 @@ class AppViewModel: ObservableObject {
     @Published var calendarEvents: [EKEvent] = []
     @Published var locations: [Location] = []
     @Published var activeWorkout: Workout?
+    @Published var session: ActiveWorkoutSession?
     
     private let eventStore = EKEventStore()
     private let locationManager = CLLocationManager()
+    private let notificationScheduler: RestNotificationScheduling = SystemNotificationScheduler()
     
     init() {
         loadData()
@@ -859,6 +861,7 @@ class AppViewModel: ObservableObject {
             exerciseLogs: logs
         )
         activeWorkout = workout
+        session = ActiveWorkoutSession(workout: workout, notificationScheduler: notificationScheduler)
     }
     
     func startNewWorkout(name: String, plan: WorkoutPlan?) {
@@ -904,6 +907,7 @@ class AppViewModel: ObservableObject {
             }
         }
         activeWorkout = nil
+        session = nil
         saveData()
     }
     
@@ -923,6 +927,8 @@ class AppViewModel: ObservableObject {
         )
         workout.exerciseLogs.append(log)
         activeWorkout = workout
+        // keep session in sync
+        if let s = session { s.workout = workout }
     }
     
     func logPastWorkout(name: String, date: Date, location: Location?, exercises: [WorkoutExercise], notes: String?) {
