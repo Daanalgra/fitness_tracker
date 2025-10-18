@@ -60,12 +60,19 @@ struct WorkoutView: View {
                         Image(systemName: "plus")
                     }
                 }
-            }
-            .sheet(isPresented: $showingNewWorkoutSheet) {
-                NewWorkoutSheet()
-            }
+        }
+        .sheet(isPresented: $showingNewWorkoutSheet) {
+            NewWorkoutSheet()
+        }
+        .fullScreenCover(isPresented: Binding(
+            get: { viewModel.activeWorkout != nil },
+            set: { if !$0 { viewModel.activeWorkout = nil; viewModel.session = nil } }
+        )) {
+            WorkoutInProgressView()
+                .environmentObject(viewModel)
         }
     }
+}
 }
 
 struct SuggestedWorkoutCard: View {
